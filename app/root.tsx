@@ -15,7 +15,7 @@ import { ThemeProvider } from "./components/theme-provider";
 import { LoadingScreen } from "./components/loading-screen";
 import { useEffect } from "react";
 import { useAuth } from "~/hooks/use-auth";
-import { useNotificationsStore } from "./hooks/use-notifications";
+import { useInterestsNotifications } from "./hooks/use-interests-notifications";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -55,7 +55,7 @@ export default function App() {
   const { checkAuth, isInitialized, user } = useAuth();
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
-  const { initializeChannel, cleanup } = useNotificationsStore();
+  const { initializeChannel, cleanup } = useInterestsNotifications(); //
 
   useEffect(() => {
     if (!isInitialized) {

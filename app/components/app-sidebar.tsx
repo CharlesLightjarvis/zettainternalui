@@ -12,6 +12,7 @@ import {
   SidebarRail,
 } from "~/components/ui/sidebar";
 import { useAuth } from "~/hooks/use-auth";
+import { NavSecondary } from "./nav-secondary";
 
 const getRoleData = (role?: string) => {
   switch (role) {
@@ -62,12 +63,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const teams = [roleData];
 
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar variant="floating" collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={teams} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
+        <NavSecondary className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />

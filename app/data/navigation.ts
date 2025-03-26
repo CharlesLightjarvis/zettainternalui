@@ -12,6 +12,9 @@ import {
   School,
   Library,
   PenTool,
+  HelpCircle,
+  LifeBuoy,
+  LogOut,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -28,7 +31,7 @@ interface NavItem {
 
 const adminNavItems: NavItem[] = [
   {
-    title: "Users Management",
+    title: "Management",
     url: "#",
     icon: Users,
     items: [
@@ -148,6 +151,64 @@ export const getNavItemsByRole = (role: string | undefined): NavItem[] => {
       return teacherNavItems;
     case "student":
       return studentNavItems;
+    default:
+      return [];
+  }
+};
+
+// Items de navigation secondaire par rôle
+const adminSecondaryItems = [
+  {
+    title: "Notifications",
+    url: "/admin/dashboard/notifications",
+    icon: Settings,
+  },
+  {
+    title: "Help",
+    url: "/admin/help",
+    icon: HelpCircle,
+  },
+  {
+    title: "Support",
+    url: "/admin/support",
+    icon: LifeBuoy,
+  },
+];
+
+const teacherSecondaryItems = [
+  {
+    title: "Settings",
+    url: "/teacher/settings",
+    icon: Settings,
+  },
+  {
+    title: "Help Center",
+    url: "/teacher/help",
+    icon: HelpCircle,
+  },
+];
+
+const studentSecondaryItems = [
+  {
+    title: "Settings",
+    url: "/student/settings",
+    icon: Settings,
+  },
+  {
+    title: "Help",
+    url: "/student/help",
+    icon: HelpCircle,
+  },
+];
+
+export const getSecondaryNavItemsByRole = (role: string | undefined) => {
+  switch (role) {
+    case "admin":
+      return adminSecondaryItems;
+    case "teacher":
+      return teacherSecondaryItems;
+    case "student":
+      return studentSecondaryItems;
     default:
       return [];
   }
