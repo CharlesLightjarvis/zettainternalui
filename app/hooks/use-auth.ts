@@ -1,35 +1,109 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { type User, users } from "~/data/users";
+import { api } from "~/api";
+
+interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  status: string;
+  imageUrl: string | null;
+  role: string;
+  created_at: string;
+  updated_at: string;
+  bio?: string;
+  title?: string;
+}
 
 interface AuthState {
   user: User | null;
-  login: (email: string) => void; // Simplifié sans password
-  logout: () => void;
+  isLoading: boolean;
+  error: string | null;
+  isInitialized: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
 }
 
-export const useAuth = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      login: (email: string) => {
-        const foundUser = users.find((u) => u.email === email);
-        if (foundUser) {
-          set({ user: foundUser });
-        }
-      },
-      logout: () => set({ user: null }),
-    }),
-    {
-      name: "auth-storage", // nom unique pour le localStorage
-    }
-  )
-);
+export const useAuth = create<AuthState>()((set) => ({
+  user: null,
+  isLoading: false,
+  error: null,
+  isInitialized: false,
 
-// Helper pour simuler un login rapide (à utiliser temporairement)
-export const quickLogin = (role: "admin" | "teacher" | "student") => {
-  const user = users.find((u) => u.role === role);
-  if (user) {
-    useAuth.getState().login(user.email);
-  }
-};
+  checkAuth: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get<{ user: User }>("/api/v1/auth/me");
+      set({
+        user: response.data.user,
+        isLoading: false,
+        isInitialized: true,
+        error: null,
+      });
+    } catch (error) {
+      set({
+        user: null,
+        isLoading: false,
+        isInitialized: true,
+        error: null,
+      });
+    }
+  },
+
+  login: async (email: string, password: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      // Get CSRF cookie
+      await api.get("sanctum/csrf-cookie");
+
+      // Login request
+      const res = await api.post<{ user: User }>("/api/login", {
+        email,
+        password,
+      });
+
+      const user = res.data.user;
+      if (!user) {
+        throw new Error("Données utilisateur invalides");
+      }
+
+      set({
+        user,
+        isLoading: false,
+        error: null,
+        isInitialized: true,
+      });
+    } catch (error) {
+      const errorMessage =
+        ((error as any).response?.data?.message as string) ||
+        "Une erreur est survenue lors de la connexion";
+
+      set({
+        error: errorMessage,
+        isLoading: false,
+        user: null,
+        isInitialized: true,
+      });
+
+      throw new Error(errorMessage);
+    }
+  },
+
+  logout: async () => {
+    try {
+      await api.post("/api/logout");
+      set({
+        user: null,
+        error: null,
+        isInitialized: true,
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      set({
+        user: null,
+        error: null,
+        isInitialized: true,
+      });
+    }
+  },
+}));

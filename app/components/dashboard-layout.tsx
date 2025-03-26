@@ -1,5 +1,5 @@
 import { Bell } from "lucide-react";
-import { Outlet } from "react-router";
+import { Navigate, Outlet, useLocation } from "react-router";
 import { AppSidebar } from "~/components/app-sidebar";
 import { ModeToggle } from "~/components/mode-toggle";
 import {
@@ -16,15 +16,59 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "~/components/ui/sidebar";
-import { RoleSwitcher } from "./role-switcher";
+import { useAuth } from "~/hooks/use-auth";
+import BellNotifications from "./bell-notifications";
 
 export default function DashboardLayout() {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  // Extraire le rôle de l'URL (admin, teacher ou student)
+  const urlRole = location.pathname.split("/")[1];
+
+  // Vérifier si l'utilisateur a le bon rôle pour accéder à cette section
+  if (!user || user.role !== urlRole) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-red-500">403</h1>
+          <p className="mt-2 text-gray-600">Accès non autorisé</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Déterminer le contenu spécifique au rôle
+  const getRoleSpecificContent = () => {
+    switch (user.role) {
+      case "admin":
+        return (
+          <div className="flex-1">
+            <Outlet />
+          </div>
+        );
+      case "teacher":
+        return (
+          <div className="flex-1">
+            <Outlet />
+          </div>
+        );
+      case "student":
+        return (
+          <div className="flex-1">
+            <Outlet />
+          </div>
+        );
+      default:
+        return <Navigate to="/login" replace />;
+    }
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
       <SidebarInset>
         <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 border-b backdrop-blur-sm bg-background/75 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <RoleSwitcher />
           <div className="flex w-full items-center gap-2 px-4">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1" />
@@ -48,12 +92,12 @@ export default function DashboardLayout() {
             </div>
             <div className="flex-1" />
             <div className="flex items-center gap-4">
-              <Bell className="h-5 w-5" />
+              <BellNotifications />
               <ModeToggle />
             </div>
           </div>
         </header>
-        <Outlet />
+        {getRoleSpecificContent()}
       </SidebarInset>
     </SidebarProvider>
   );

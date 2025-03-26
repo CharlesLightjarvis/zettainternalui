@@ -5,12 +5,17 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
+  Navigate,
 } from "react-router";
-
 import type { Route } from "./+types/root";
 import "./app.css";
-import { Toaster, toast } from "sonner";
+import { Toaster } from "sonner";
 import { ThemeProvider } from "./components/theme-provider";
+import { LoadingScreen } from "./components/loading-screen";
+import { useEffect } from "react";
+import { useAuth } from "~/hooks/use-auth";
+import { useNotificationsStore } from "./hooks/use-notifications";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -40,14 +45,53 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
-        <Toaster richColors />
+        <Toaster richColors position="bottom-center" />
       </body>
     </html>
   );
 }
 
 export default function App() {
+  const { checkAuth, isInitialized, user } = useAuth();
+  const location = useLocation();
+  const isLoginPage = location.pathname === "/login";
+  const { initializeChannel, cleanup } = useNotificationsStore();
+
+  useEffect(() => {
+    if (!isInitialized) {
+      checkAuth();
+    }
+  }, [isInitialized, checkAuth]);
+
+  // Initialiser le channel Echo seulement après l'authentification
+  useEffect(() => {
+    if (user && !isLoginPage) {
+      initializeChannel();
+    }
+
+    // Cleanup lors de la déconnexion ou du démontage
+    return () => {
+      cleanup();
+    };
+  }, [user, isLoginPage, initializeChannel, cleanup]);
+
+  if (!isInitialized) {
+    return <LoadingScreen />;
+  }
+
+  if (!user && !isLoginPage) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user && isLoginPage) {
+    return <Navigate to={`${user.role}/dashboard`} replace />;
+  }
+
   return <Outlet />;
+}
+
+export function HydrateFallback() {
+  return <LoadingScreen />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

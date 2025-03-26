@@ -1,6 +1,4 @@
-import type { Route } from "./+types/home";
-
-import { Navigate } from "react-router";
+import type { Route } from "../+types/home";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -10,6 +8,5 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  // Redirect to login
-  return <Navigate to="/login" replace />;
+  return <div>StudentDashboard</div>;
 }

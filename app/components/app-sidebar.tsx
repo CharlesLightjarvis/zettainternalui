@@ -50,7 +50,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ? {
         name: user.fullName,
         email: user.email,
-        avatar: user.avatar,
+        avatar: user.imageUrl || "/avatars/default.jpg",
       }
     : {
         name: "Guest",

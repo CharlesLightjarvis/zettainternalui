@@ -35,11 +35,13 @@ export function NavMain() {
             )} Dashboard`
           : "Dashboard"}
       </SidebarGroupLabel>
-      <Link to="/">
+      <Link to={`/${user?.role}/dashboard`}>
         <SidebarMenuButton
           tooltip="dashboard"
           className={
-            location.pathname === "/" ? "bg-[rgb(245,129,45)] text-white" : ""
+            location.pathname === `/${user?.role}/dashboard`
+              ? "bg-[rgb(245,129,45)] text-white"
+              : ""
           }
         >
           <Home />
