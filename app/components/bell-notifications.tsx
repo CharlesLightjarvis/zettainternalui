@@ -1,6 +1,6 @@
 import { useAuth } from "~/hooks/use-auth";
 import StudentNotifications from "~/routes/student/student-notifications";
-import AdminNotifications from "~/routes/admin/notifications/admin-notifications";
+import AdminNotifications from "~/routes/admin/notifications/admin-bell-notifications";
 import TeacherNotifications from "~/routes/teacher/teacher-notifications";
 
 export default function BellNotifications() {

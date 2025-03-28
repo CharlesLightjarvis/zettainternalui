@@ -11,12 +11,14 @@ interface NotificationListProps {
   notifications: FormationInterest[];
   onNotificationClick: (notification: FormationInterest) => void;
   selectedNotification: FormationInterest | null;
+  readNotifications: string[]; // Nouveau
 }
 
 export function NotificationList({
   notifications,
   onNotificationClick,
   selectedNotification,
+  readNotifications,
 }: NotificationListProps) {
   if (notifications.length === 0) {
     return (
@@ -41,16 +43,21 @@ export function NotificationList({
           .map((name) => name[0])
           .join("")
           .toUpperCase();
+        const isRead = readNotifications.includes(notification.id);
 
         return (
           <div
             key={`${notification.id}-${notification.formation.id}`}
             className={cn(
-              "p-4 cursor-pointer hover:bg-muted transition-colors",
-              isSelected && "bg-muted border-l-4 border-primary"
+              "p-4 cursor-pointer hover:bg-muted transition-colors relative",
+              isSelected && "bg-muted border-l-4 border-primary",
+              !isRead && "bg-primary/5" // Nouveau: style pour non lue
             )}
             onClick={() => onNotificationClick(notification)}
           >
+            {!isRead && (
+              <div className="absolute left-2 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-primary rounded-full" />
+            )}
             <div className="flex gap-3">
               <Avatar className="h-10 w-10 border flex-shrink-0">
                 <AvatarFallback className="bg-primary/10 text-primary">

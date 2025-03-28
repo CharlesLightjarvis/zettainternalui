@@ -14,7 +14,6 @@ import { NotificationDetail } from "~/routes/admin/notifications/notification-de
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Input } from "~/components/ui/input";
-import { mockNotifications } from "~/data/notifications";
 import {
   useInterestsNotifications,
   type FormationInterest,
@@ -27,10 +26,10 @@ export default function NotificationPage() {
     isLoading,
     selectedNotification,
     setSelectedNotification,
+    markAsRead, // Nouveau
+    readNotifications, // Nouveau
   } = useInterestsNotifications();
 
-  const [notifications, setNotifications] =
-    useState<FormationInterest[]>(mockNotifications);
   const [unreadCount, setUnreadCount] = useState(3);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
@@ -48,6 +47,11 @@ export default function NotificationPage() {
   });
 
   const handleNotificationClick = (notification: FormationInterest) => {
+    // Marquer comme lu seulement si ce n'est pas déjà fait
+    if (!readNotifications.includes(notification.id)) {
+      markAsRead(notification.id);
+    }
+
     // Normaliser la structure de la notification
     const normalizedNotification = {
       id: notification.id,
@@ -72,41 +76,11 @@ export default function NotificationPage() {
   };
 
   const handleAccept = (updatedInterest: FormationInterest) => {
-    const updatedNotification = {
-      ...updatedInterest,
-      interest: {
-        ...updatedInterest,
-        formation: {
-          ...updatedInterest.formation,
-          status: "accepted",
-        },
-      },
-    };
-    setNotifications(
-      notifications.map((notif) =>
-        notif.id === updatedInterest.id ? updatedNotification : notif
-      )
-    );
-    setSelectedNotification(null);
+    //
   };
 
   const handleReject = (notification: FormationInterest) => {
-    const updatedNotification = {
-      ...notification,
-      interest: {
-        ...notification,
-        formation: {
-          ...notification.formation,
-          status: "rejected",
-        },
-      },
-    };
-    setNotifications(
-      notifications.map((notif) =>
-        notif.id === notification.id ? updatedNotification : notif
-      )
-    );
-    setSelectedNotification(null);
+    //
   };
 
   const handleClose = () => {
@@ -169,6 +143,7 @@ export default function NotificationPage() {
                         notifications={filteredNotifications}
                         onNotificationClick={handleNotificationClick}
                         selectedNotification={selectedNotification}
+                        readNotifications={readNotifications}
                       />
                     </TabsContent>
 
@@ -179,6 +154,7 @@ export default function NotificationPage() {
                         )}
                         onNotificationClick={handleNotificationClick}
                         selectedNotification={selectedNotification}
+                        readNotifications={readNotifications}
                       />
                     </TabsContent>
 
@@ -189,6 +165,7 @@ export default function NotificationPage() {
                         )}
                         onNotificationClick={handleNotificationClick}
                         selectedNotification={selectedNotification}
+                        readNotifications={readNotifications}
                       />
                     </TabsContent>
                   </div>
