@@ -2,6 +2,7 @@
 
 import { ChevronRight, Home, type LucideIcon } from "lucide-react";
 import { Link, useLocation } from "react-router";
+import { useEffect, useState } from "react";
 
 import {
   Collapsible,
@@ -21,10 +22,35 @@ import {
 import { useAuth } from "~/hooks/use-auth";
 import { getNavItemsByRole } from "~/data/navigation";
 
+const STORAGE_KEY = "sidebar_menu_state";
+
 export function NavMain() {
   const location = useLocation();
   const user = useAuth((state) => state.user);
   const navItems = getNavItemsByRole(user?.role);
+
+  // État pour suivre les éléments ouverts
+  const [openItems, setOpenItems] = useState<Record<string, boolean>>(() => {
+    // Récupérer l'état sauvegardé du localStorage au chargement
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : {};
+    }
+    return {};
+  });
+
+  // Sauvegarder l'état dans localStorage quand il change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(openItems));
+  }, [openItems]);
+
+  // Gérer le changement d'état d'un élément
+  const handleItemToggle = (itemTitle: string, isOpen: boolean) => {
+    setOpenItems((prev) => ({
+      ...prev,
+      [itemTitle]: isOpen,
+    }));
+  };
 
   return (
     <SidebarGroup>
@@ -53,7 +79,8 @@ export function NavMain() {
           <Collapsible
             key={item.title}
             asChild
-            defaultOpen={item.isActive}
+            open={openItems[item.title]}
+            onOpenChange={(isOpen) => handleItemToggle(item.title, isOpen)}
             className="group/collapsible"
           >
             <SidebarMenuItem>
@@ -79,13 +106,16 @@ export function NavMain() {
                     <SidebarMenuSubItem key={subItem.title}>
                       <Link to={subItem.url}>
                         <SidebarMenuSubButton
+                          asChild
                           className={
                             location.pathname === subItem.url
                               ? "bg-[rgb(245,129,45)] text-white"
                               : ""
                           }
                         >
-                          <span>{subItem.title}</span>
+                          <div>
+                            <span>{subItem.title}</span>
+                          </div>
                         </SidebarMenuSubButton>
                       </Link>
                     </SidebarMenuSubItem>

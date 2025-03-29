@@ -407,8 +407,10 @@ function SidebarGroupLabel({
   className,
   asChild = false,
   ...props
-}: React.ComponentProps<"div"> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot : "div";
+}: // }: React.ComponentProps<"div"> & { asChild?: boolean }) {
+React.ComponentProps<"a"> & { asChild?: boolean }) {
+  // const Comp = asChild ? Slot : "div";
+  const Comp = asChild ? Slot : "a";
 
   return (
     <Comp

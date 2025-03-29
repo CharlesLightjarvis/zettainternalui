@@ -35,7 +35,7 @@ const adminNavItems: NavItem[] = [
     url: "#",
     icon: Users,
     items: [
-      { title: "All Users", url: "/admin/users" },
+      { title: "Utilisateurs", url: "/admin/dashboard/users" },
       { title: "Add User", url: "/admin/users/add" },
       { title: "Roles", url: "/admin/users/roles" },
     ],

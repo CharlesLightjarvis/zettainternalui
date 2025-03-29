@@ -1,61 +1,13 @@
+import { toast } from "sonner";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { api } from "~/api";
 import echo from "~/echo";
 import { useAuth } from "~/hooks/use-auth";
-
-export interface Category {
-  id: string;
-  name: string;
-}
-
-export interface Formation {
-  id: string;
-  name: string;
-  slug: string;
-  image: string | null;
-  description: string;
-  duration: number;
-  level: string;
-  price: number;
-  category: Category;
-}
-
-export interface FormationInterest {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  message: string;
-  status: "pending" | "accepted" | "rejected";
-  created_at: string;
-  updated_at: string;
-  formation: Formation;
-}
-
-export interface FormationInterestPayload {
-  interest: {
-    id: string;
-    fullName: string;
-    email: string;
-    phone: string;
-    message: string;
-    status: "pending" | "accepted" | "rejected";
-    created_at: string;
-    updated_at: string;
-    formation: {
-      id: string;
-      name: string;
-      slug: string;
-      image: string | null;
-      description: string;
-      duration: number;
-      level: string;
-      price: number;
-      category: Category;
-    };
-  };
-}
+import type {
+  FormationInterest,
+  FormationInterestPayload,
+} from "~/types/formation-interest";
 
 const NOTIFICATION_SOUNDS = {
   admin: "/sounds/notification.mp3",
@@ -190,6 +142,15 @@ export const useInterestsNotifications = create<InterestNotificationStore>()(
               set((state) => ({
                 interests: [interest, ...state.interests],
               }));
+
+              // Ajoutez le toast ici
+              toast.info(
+                `Nouvelle demande de pré-inscription de ${interest.fullName}`,
+                {
+                  description: `Formation: ${interest.formation.name}`,
+                  duration: 5000,
+                }
+              );
 
               if (window.location.pathname.includes("/notifications")) {
                 get().fetchInterests();

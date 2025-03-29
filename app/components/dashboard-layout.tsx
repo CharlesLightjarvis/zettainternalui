@@ -1,4 +1,3 @@
-import { Bell } from "lucide-react";
 import { Navigate, Outlet, useLocation } from "react-router";
 import { AppSidebar } from "~/components/app-sidebar";
 import { ModeToggle } from "~/components/mode-toggle";
@@ -18,6 +17,7 @@ import {
 } from "~/components/ui/sidebar";
 import { useAuth } from "~/hooks/use-auth";
 import BellNotifications from "./bell-notifications";
+import Forbidden from "./errors/forbidden";
 
 export default function DashboardLayout() {
   const { user } = useAuth();
@@ -28,14 +28,7 @@ export default function DashboardLayout() {
 
   // Vérifier si l'utilisateur a le bon rôle pour accéder à cette section
   if (!user || user.role !== urlRole) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-red-500">403</h1>
-          <p className="mt-2 text-gray-600">Accès non autorisé</p>
-        </div>
-      </div>
-    );
+    return <Forbidden />;
   }
 
   // Déterminer le contenu spécifique au rôle

@@ -26,6 +26,7 @@ export default [
         "notifications",
         "./routes/admin/notifications/notification-page.tsx"
       ),
+      route("users", "./routes/admin/users/users-list.tsx"),
     ]),
   ]),
 ] satisfies RouteConfig;
