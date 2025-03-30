@@ -1,15 +1,15 @@
 import { useEffect } from "react";
-import { UsersDataTable } from "./users-datatable";
-import { useUsersStore } from "~/hooks/use-users-store";
+import { CategoriesDataTable } from "./categories-datatable";
 import { LoadingScreen } from "~/components/loading-screen";
+import { useCategoriesStore } from "~/hooks/use-categories-store";
 
-export default function UsersList() {
-  const { users, isLoading, error, getUsers } = useUsersStore();
+export default function CategoriesList() {
+  const { categories, isLoading, error, getCategories } = useCategoriesStore();
 
   useEffect(() => {
     // Vérifie si les données sont déjà chargées
-    if (users.length === 0) {
-      getUsers();
+    if (categories.length === 0) {
+      getCategories();
     }
   }, []); // Dépendance vide pour n'exécuter qu'au montage
 
@@ -22,7 +22,7 @@ export default function UsersList() {
       <div className="flex flex-1 flex-col">
         <div className="@container/main flex flex-1 flex-col gap-2">
           <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-            <UsersDataTable data={users} />
+            <CategoriesDataTable data={categories} />
           </div>
         </div>
       </div>

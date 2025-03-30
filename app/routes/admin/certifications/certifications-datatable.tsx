@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import {
   DndContext,
@@ -88,124 +86,105 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import type { userSchema } from "~/types/user";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Dialog, DialogContent, DialogTrigger } from "~/components/ui/dialog";
-import { AddUserForm } from "./add-user-form";
-import { useUsersStore } from "~/hooks/use-users-store";
 import { ConfirmDialog } from "~/components/ui/confirm-dialog";
-import { EditUserForm } from "./edit-user-form";
-import RolesPermissionsPage from "./roles-and-persmissions";
+import { useFormationsStore } from "~/hooks/use-formations-store";
+import { AddCertificationForm } from "./add-certification-form";
+import { EditCertificationForm } from "./edit-certification-form";
+import type { certificationSchema } from "~/types/certification";
+import { useCertificationsStore } from "~/hooks/use-certifications-store";
 
-const columns: ColumnDef<z.infer<typeof userSchema>>[] = [
+const columns: ColumnDef<z.infer<typeof certificationSchema>>[] = [
   {
-    accessorKey: "fullName",
-    header: "Nom & Prénom",
+    accessorKey: "name",
+    header: "Nom",
     cell: ({ row }) => (
-      <div className="flex items-center gap-3">
-        <Avatar className="h-8 w-8">
-          {row.original.imageUrl ? (
-            <AvatarImage
-              src={row.original.imageUrl}
-              alt={row.original.fullName}
-              className="object-cover"
-            />
-          ) : (
-            <AvatarFallback className="bg-primary/10">
-              <UserIcon className="h-4 w-4 text-primary" />
-            </AvatarFallback>
-          )}
-        </Avatar>
-        <span className="font-medium">{row.original.fullName}</span>
+      <div className="flex items-center gap-2">
+        <div className="flex flex-col">
+          <span className="font-medium">{row.original.name}</span>
+        </div>
       </div>
     ),
   },
   {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "formation",
+    header: "Formation",
     cell: ({ row }) => (
       <div className="flex items-center gap-1">
-        <Mail className="h-3 w-3 text-muted-foreground" />
-        <Badge variant="outline" className="px-1.5 text-muted-foreground">
-          {row.original.email}
+        <Badge variant="outline" className="px-2 py-1">
+          {row.original.formation.name}
         </Badge>
       </div>
     ),
   },
   {
-    accessorKey: "role",
-    header: "Role",
-    cell: ({ row }) => {
-      const roleConfig = {
-        admin: {
-          icon: ShieldIcon,
-          style: "bg-red-100 text-red-700 dark:bg-red-900/30",
-        },
-        teacher: {
-          icon: GraduationCapIcon,
-          style: "bg-blue-100 text-blue-700 dark:bg-blue-900/30",
-        },
-        student: {
-          icon: BookOpenIcon,
-          style: "bg-green-100 text-green-700 dark:bg-green-900/30",
-        },
-      };
-
-      const RoleIcon = roleConfig[row.original.role].icon;
-
-      return (
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ${
-            roleConfig[row.original.role].style
-          }`}
-        >
-          <RoleIcon className="h-3.5 w-3.5" />
-          {row.original.role.charAt(0).toUpperCase() +
-            row.original.role.slice(1)}
-        </span>
-      );
-    },
+    accessorKey: "details",
+    header: "Détails",
+    cell: ({ row }) => (
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <GraduationCapIcon className="h-4 w-4 text-muted-foreground" />
+          <span className="capitalize">{row.original.level}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>{row.original.provider}</span>
+        </div>
+      </div>
+    ),
   },
   {
-    accessorKey: "phone",
-    header: "Téléphone",
+    accessorKey: "validity_period",
+    header: "Validité",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-1">
+        <span>
+          {row.original.validity_period}{" "}
+          {row.original.validity_period > 1 ? "ans" : "an"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "requirements",
+    header: "Pré & Comp",
     cell: ({ row }) => {
-      const phone = row.original.phone || "Non renseigné";
+      const prerequisites = row.original.prerequisites ?? [];
+      const skills = row.original.skills ?? [];
+      const hasPrerequisites = prerequisites.length > 0;
+      const hasSkills = skills.length > 0;
+
+      if (!hasPrerequisites && !hasSkills) {
+        return <div className="text-sm text-muted-foreground">N/A</div>;
+      }
 
       return (
-        <div className="flex items-center gap-1">
-          <PhoneIcon className="h-3 w-3 text-muted-foreground" />
-          <Badge variant="outline" className="px-1.5 text-muted-foreground">
-            {phone}
-          </Badge>
+        <div className="flex flex-col gap-2">
+          {hasPrerequisites && (
+            <div className="flex flex-wrap gap-1">
+              {prerequisites.map((prerequisite, index) => (
+                <Badge key={index} variant="secondary" className="text-xs">
+                  {prerequisite}
+                </Badge>
+              ))}
+            </div>
+          )}
+          {hasSkills && (
+            <div className="flex flex-wrap gap-1">
+              {skills.map((skill, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {skill}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       );
     },
-  },
-
-  {
-    accessorKey: "status",
-    header: "Statut",
-    cell: ({ row }) => (
-      <Badge
-        variant="outline"
-        className="flex gap-1 px-1.5 text-muted-foreground [&_svg]:size-3"
-      >
-        {row.original.status === "active" ? (
-          <CheckCircle2Icon className="text-green-500 dark:text-green-400" />
-        ) : (
-          <XCircle className="w-6 h-6 text-red-500" />
-        )}
-        {row.original.status}
-      </Badge>
-    ),
   },
   {
     accessorKey: "created_at",
     header: "Informations",
     cell: ({ row }) => {
-      // Convertir la date Laravel (y-m-d h:i) en objet Date JavaScript
-      const created = new Date(row.original.created_at + " UTC"); // Ajouter UTC pour forcer le bon fuseau horaire
+      const created = new Date(row.original.created_at + " UTC");
       const now = new Date();
 
       const diffTime = now.getTime() - created.getTime();
@@ -225,6 +204,7 @@ const columns: ColumnDef<z.infer<typeof userSchema>>[] = [
       } else {
         timeAgoText = `Il y a ${diffDays} jour${diffDays > 1 ? "s" : ""}`;
       }
+
       return (
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
@@ -243,16 +223,17 @@ const columns: ColumnDef<z.infer<typeof userSchema>>[] = [
     },
     sortingFn: "datetime",
   },
+
   {
     id: "actions",
     cell: ({ row }) => {
       const [openConfirm, setOpenConfirm] = React.useState(false);
       const [openEdit, setOpenEdit] = React.useState(false);
-      const { deleteUser } = useUsersStore();
+      const { deleteCertification } = useCertificationsStore();
 
       const handleDelete = async () => {
         try {
-          const message = await deleteUser(row.original.id);
+          const message = await deleteCertification(row.original.id);
           toast.success("Success", {
             description: message || "User deleted successfully",
           });
@@ -293,8 +274,8 @@ const columns: ColumnDef<z.infer<typeof userSchema>>[] = [
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <EditUserForm
-            userId={row.original.id}
+          <EditCertificationForm
+            certificationId={row.original.id}
             open={openEdit}
             onOpenChange={setOpenEdit}
           />
@@ -312,7 +293,11 @@ const columns: ColumnDef<z.infer<typeof userSchema>>[] = [
   },
 ];
 
-function DraggableRow({ row }: { row: Row<z.infer<typeof userSchema>> }) {
+function DraggableRow({
+  row,
+}: {
+  row: Row<z.infer<typeof certificationSchema>>;
+}) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: row.original.id,
   });
@@ -337,10 +322,10 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof userSchema>> }) {
   );
 }
 
-export function UsersDataTable({
+export function CertificationsDataTable({
   data: initialData,
 }: {
-  data: z.infer<typeof userSchema>[];
+  data: z.infer<typeof certificationSchema>[];
 }) {
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -404,14 +389,14 @@ export function UsersDataTable({
 
   return (
     <Tabs
-      defaultValue="users"
+      defaultValue="certifications"
       className="flex w-full flex-col justify-start gap-6"
     >
       <div className="flex items-center justify-between px-4 lg:px-6">
         <Label htmlFor="view-selector" className="sr-only">
           View
         </Label>
-        <Select defaultValue="users">
+        <Select defaultValue="certifications">
           <SelectTrigger
             className="@4xl/main:hidden flex w-fit"
             id="view-selector"
@@ -419,12 +404,12 @@ export function UsersDataTable({
             <SelectValue placeholder="Select a view" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="users">Utilisateurs </SelectItem>
+            <SelectItem value="certifications">Certifications </SelectItem>
           </SelectContent>
         </Select>
         <TabsList className="@4xl/main:flex hidden">
-          <TabsTrigger value="users">
-            Utilisateurs
+          <TabsTrigger value="certifications">
+            Certifications
             <Badge
               variant="secondary"
               className="flex h-5 w-5 items-center justify-center rounded-full bg-muted-foreground/30"
@@ -467,11 +452,11 @@ export function UsersDataTable({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <AddUserForm /> {/* Ajout du composant AddUserForm */}
+          <AddCertificationForm /> {/* Ajout du composant AddCategorieForm */}
         </div>
       </div>
       <TabsContent
-        value="users"
+        value="certifications"
         className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
       >
         <div className="overflow-hidden rounded-lg border">

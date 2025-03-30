@@ -27,6 +27,12 @@ export default [
         "./routes/admin/notifications/notification-page.tsx"
       ),
       route("users", "./routes/admin/users/users-list.tsx"),
+      route("categories", "./routes/admin/categories/categories-list.tsx"),
+      route("formations", "./routes/admin/formations/formations-list.tsx"),
+      route(
+        "certifications",
+        "./routes/admin/certifications/certifications-list.tsx"
+      ),
     ]),
   ]),
 ] satisfies RouteConfig;
