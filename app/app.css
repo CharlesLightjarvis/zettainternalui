@@ -133,3 +133,39 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Personnalisation de la barre de défilement pour tout le site */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+}
+
+/* Pour les navigateurs WebKit (Chrome, Safari, etc.) */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.5);
+  border-radius: 20px;
+  border: 2px solid transparent;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(155, 155, 155, 0.7);
+}
+
+/* Pour cacher complètement la barre de défilement mais garder la fonctionnalité */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

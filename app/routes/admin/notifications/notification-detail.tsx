@@ -27,7 +27,7 @@ import {
 import { formatDistanceToNow, parse } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
-import type { FormationInterest } from "~/hooks/use-interests-notifications";
+import type { FormationInterest } from "~/types/formation-interest";
 
 interface NotificationDetailProps {
   notification: FormationInterest;
@@ -285,7 +285,7 @@ export function NotificationDetail({
                     Prix
                   </p>
                   <p className="text-sm text-foreground font-medium break-words">
-                    {notification.formation.price.toLocaleString("fr-FR")} €
+                    {notification.formation.price.toLocaleString("fr-FR")} DT
                   </p>
                 </div>
               </div>

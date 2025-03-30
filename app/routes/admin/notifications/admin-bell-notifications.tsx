@@ -8,12 +8,10 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { XIcon } from "lucide-react";
-import {
-  useInterestsNotifications,
-  type FormationInterest,
-} from "~/hooks/use-interests-notifications";
+import { useInterestsNotifications } from "~/hooks/use-interests-notifications";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
+import type { FormationInterest } from "~/types/formation-interest";
 
 export default function AdminNotifications() {
   const navigate = useNavigate();

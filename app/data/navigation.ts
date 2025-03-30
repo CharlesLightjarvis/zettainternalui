@@ -39,6 +39,9 @@ const adminNavItems: NavItem[] = [
       { title: "Categories", url: "/admin/dashboard/categories" },
       { title: "Formations", url: "/admin/dashboard/formations" },
       { title: "Certifications", url: "/admin/dashboard/certifications" },
+      { title: "Sessions", url: "/admin/dashboard/sessions" },
+      { title: "Modules", url: "/admin/dashboard/modules" },
+      { title: "Lessons", url: "/admin/dashboard/lessons" },
     ],
   },
   {

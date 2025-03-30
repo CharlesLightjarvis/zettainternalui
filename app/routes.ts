@@ -33,6 +33,9 @@ export default [
         "certifications",
         "./routes/admin/certifications/certifications-list.tsx"
       ),
+      route("sessions", "./routes/admin/sessions/sessions-list.tsx"),
+      route("modules", "./routes/admin/modules/modules-list.tsx"),
+      route("lessons", "./routes/admin/lessons/lessons-list.tsx"),
     ]),
   ]),
 ] satisfies RouteConfig;

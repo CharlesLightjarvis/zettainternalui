@@ -5,7 +5,7 @@ import { fr } from "date-fns/locale";
 import { Badge } from "~/components/ui/badge";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { cn } from "~/lib/utils";
-import type { FormationInterest } from "~/hooks/use-interests-notifications";
+import type { FormationInterest } from "~/types/formation-interest";
 
 interface NotificationListProps {
   notifications: FormationInterest[];

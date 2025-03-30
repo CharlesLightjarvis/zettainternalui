@@ -14,10 +14,8 @@ import { NotificationDetail } from "~/routes/admin/notifications/notification-de
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Input } from "~/components/ui/input";
-import {
-  useInterestsNotifications,
-  type FormationInterest,
-} from "~/hooks/use-interests-notifications";
+import { useInterestsNotifications } from "~/hooks/use-interests-notifications";
+import type { FormationInterest } from "~/types/formation-interest";
 
 export default function NotificationPage() {
   const {
