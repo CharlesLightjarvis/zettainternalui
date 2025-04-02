@@ -62,7 +62,7 @@ export default function App() {
     if (!isInitialized) {
       checkAuth();
     }
-  }, [isInitialized, checkAuth]);
+  }, [isInitialized]);
 
   // Initialiser le channel Echo seulement après l'authentification
   useEffect(() => {

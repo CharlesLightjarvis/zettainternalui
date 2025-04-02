@@ -36,6 +36,11 @@ if (typeof window !== "undefined") {
   });
 }
 
+export interface ApproveInterestResponse {
+  success: boolean;
+  message: string;
+}
+
 interface InterestNotificationStore {
   notifications: FormationInterest[];
   interests: FormationInterest[];
@@ -56,6 +61,7 @@ interface InterestNotificationStore {
   fetchInterests: () => Promise<void>;
   markAsRead: (id: string) => void;
   getUnreadNotifications: () => FormationInterest[];
+  approveInterest: (id: string) => Promise<ApproveInterestResponse>;
 }
 
 export const useInterestsNotifications = create<InterestNotificationStore>()(
@@ -70,10 +76,12 @@ export const useInterestsNotifications = create<InterestNotificationStore>()(
       isLoading: false,
       readNotifications: [],
 
+      // set selected notification
       setSelectedNotification: (notification) => {
         set({ selectedNotification: notification });
       },
 
+      // get unread notifications
       getUnreadNotifications: () => {
         const state = get();
         return state.interests.filter(
@@ -81,6 +89,7 @@ export const useInterestsNotifications = create<InterestNotificationStore>()(
         );
       },
 
+      // mark as read
       markAsRead: (id: string) => {
         set((state) => {
           // Ensure the ID is not already in readNotifications
@@ -96,6 +105,7 @@ export const useInterestsNotifications = create<InterestNotificationStore>()(
         });
       },
 
+      // fetch interests
       fetchInterests: async () => {
         set({ isLoading: true });
         try {
@@ -121,6 +131,45 @@ export const useInterestsNotifications = create<InterestNotificationStore>()(
         }
       },
 
+      // approve interest
+      approveInterest: async (id: string): Promise<ApproveInterestResponse> => {
+        try {
+          const response = await api.post<ApproveInterestResponse>(
+            `/api/v1/admin/interests/${id}/approve`
+          );
+
+          if (!response.data.success) {
+            throw new Error(response.data.message || "Échec de l'approbation");
+          }
+
+          // Mettre à jour l'état local immédiatement
+          set((state) => ({
+            interests: state.interests.map((interest) =>
+              interest.id === id
+                ? { ...interest, status: "approved" }
+                : interest
+            ),
+            // Mettre à jour aussi la notification sélectionnée si elle existe
+            selectedNotification:
+              state.selectedNotification?.id === id
+                ? { ...state.selectedNotification, status: "approved" }
+                : state.selectedNotification,
+          }));
+
+          // Rafraîchir les données
+          await get().fetchInterests();
+
+          return response.data;
+        } catch (error: any) {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.message ||
+            "Échec de l'approbation";
+          throw new Error(errorMessage);
+        }
+      },
+
+      // initialize channel
       initializeChannel: () => {
         if (typeof window === "undefined" || !window.Pusher || !echo) return;
         if (get().channel) return;
@@ -199,6 +248,7 @@ export const useInterestsNotifications = create<InterestNotificationStore>()(
         }
       },
 
+      // add notification
       addNotification: (notification) => {
         const { user } = useAuth.getState();
 
@@ -231,6 +281,7 @@ export const useInterestsNotifications = create<InterestNotificationStore>()(
         }));
       },
 
+      // toggle sound
       toggleSound: () => {
         const { user } = useAuth.getState();
         if (user?.role && !notificationSounds[user.role]) {
@@ -239,6 +290,7 @@ export const useInterestsNotifications = create<InterestNotificationStore>()(
         set((state) => ({ soundEnabled: !state.soundEnabled }));
       },
 
+      // mark all as read
       markAllAsRead: () => {
         set((state) => {
           const readIds = state.notifications.map((n) => n.id);
@@ -250,6 +302,7 @@ export const useInterestsNotifications = create<InterestNotificationStore>()(
         });
       },
 
+      // remove notification by index
       removeNotification: (index: number) => {
         set((state) => {
           const notification = state.notifications[index];
@@ -267,6 +320,7 @@ export const useInterestsNotifications = create<InterestNotificationStore>()(
         });
       },
 
+      // cleanup
       cleanup: () => {
         const channel = get().channel;
         if (channel) {

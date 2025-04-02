@@ -41,7 +41,11 @@ export default function NotificationPage() {
         .includes(searchQuery.toLowerCase());
 
     if (activeTab === "all") return matchesSearch;
-    return matchesSearch && notification.status === activeTab;
+    if (activeTab === "approved")
+      return matchesSearch && notification.status === "approved";
+    if (activeTab === "pending")
+      return matchesSearch && notification.status === "pending";
+    return matchesSearch;
   });
 
   const handleNotificationClick = (notification: FormationInterest) => {
@@ -73,8 +77,20 @@ export default function NotificationPage() {
     }
   };
 
-  const handleAccept = (updatedInterest: FormationInterest) => {
-    //
+  const handleAccept = async (notification: FormationInterest) => {
+    try {
+      const { approveInterest } = useInterestsNotifications.getState();
+      const response = await approveInterest(notification.id);
+
+      if (response.success) {
+        // Mettre à jour la notification sélectionnée avec le nouveau statut
+        setSelectedNotification(null);
+        // Forcer un rafraîchissement des données
+        await fetchInterests();
+      }
+    } catch (error) {
+      console.error("Error approving interest:", error);
+    }
   };
 
   const handleReject = (notification: FormationInterest) => {
@@ -125,7 +141,7 @@ export default function NotificationPage() {
                       En attente
                     </TabsTrigger>
                     <TabsTrigger
-                      value="accepted"
+                      value="approved"
                       className="data-[state=active]:bg-green-50 data-[state=active]:text-green-600 dark:data-[state=active]:bg-green-500/20 dark:data-[state=active]:text-green-400"
                     >
                       Acceptées
@@ -156,10 +172,10 @@ export default function NotificationPage() {
                       />
                     </TabsContent>
 
-                    <TabsContent value="accepted" className="p-0 m-0 h-full">
+                    <TabsContent value="approved" className="p-0 m-0 h-full">
                       <NotificationList
                         notifications={filteredNotifications.filter(
-                          (n) => n.status === "accepted"
+                          (n) => n.status === "approved"
                         )}
                         onNotificationClick={handleNotificationClick}
                         selectedNotification={selectedNotification}

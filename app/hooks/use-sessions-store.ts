@@ -28,6 +28,11 @@ interface SessionsState {
 
   setSelectedSession: (session: Session | null) => void;
   clearError: () => void;
+
+  // New methods for student management
+  getSessionStudents: (sessionId: string) => Promise<any[]>;
+  enrollStudent: (sessionId: string, userId: string) => Promise<any>;
+  unenrollStudent: (sessionId: string, userId: string) => Promise<any>;
 }
 
 export const useSessionsStore = create<SessionsState>()((set, get) => ({
@@ -118,6 +123,41 @@ export const useSessionsStore = create<SessionsState>()((set, get) => ({
         error.response?.data?.message || "Failed to update session";
       set({ error: errorMessage, isLoading: false });
       throw new Error(errorMessage);
+    }
+  },
+
+  getSessionStudents: async (sessionId: string) => {
+    try {
+      const response = await api.get(
+        `/api/v1/admin/sessions/${sessionId}/students`
+      );
+      return response.data.students;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  enrollStudent: async (sessionId: string, userId: string) => {
+    try {
+      const response = await api.post<SuccessResponse>(
+        `/api/v1/admin/sessions/${sessionId}/students/${userId}`
+      );
+      await get().getSessions(); // Rafraîchir la liste après suppression
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  unenrollStudent: async (sessionId: string, userId: string) => {
+    try {
+      const response = await api.delete<SuccessResponse>(
+        `/api/v1/admin/sessions/${sessionId}/students/${userId}`
+      );
+      await get().getSessions(); // Rafraîchir la liste après suppression
+      return response.data;
+    } catch (error) {
+      throw error;
     }
   },
 

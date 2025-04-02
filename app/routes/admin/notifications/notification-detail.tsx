@@ -28,6 +28,8 @@ import { formatDistanceToNow, parse } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import type { FormationInterest } from "~/types/formation-interest";
+import { useInterestsNotifications } from "~/hooks/use-interests-notifications";
+import { toast } from "sonner";
 
 interface NotificationDetailProps {
   notification: FormationInterest;
@@ -42,6 +44,7 @@ export function NotificationDetail({
 }: NotificationDetailProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedNotification, setEditedNotification] = useState(notification);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const initials = notification.fullName
     .split(" ")
@@ -61,8 +64,51 @@ export function NotificationDetail({
     // Ici vous pouvez ajouter la logique pour sauvegarder les modifications
   };
 
-  const handleAccept = () => {
-    onAccept(notification);
+  const handleAccept = async () => {
+    setIsSubmitting(true);
+    try {
+      const { approveInterest } = useInterestsNotifications.getState();
+      const response = await approveInterest(notification.id);
+
+      if (response.success) {
+        onAccept(notification);
+        toast.success(
+          response.message || "La demande a été approuvée avec succès"
+        );
+      } else {
+        throw new Error(response.message);
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Erreur lors de l'approbation de la demande"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const getTimeAgo = (dateString: string) => {
+    const created = new Date(dateString + " UTC");
+    const now = new Date();
+    const diffTime = now.getTime() - created.getTime();
+    const diffMinutes = Math.round(diffTime / (1000 * 60));
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    let timeAgoText;
+    if (diffMinutes < 1) {
+      timeAgoText = "à l'instant";
+    } else if (diffMinutes < 60) {
+      timeAgoText = `${diffMinutes} minute${diffMinutes > 1 ? "s" : ""}`;
+    } else if (diffHours < 24) {
+      timeAgoText = `${diffHours} heure${diffHours > 1 ? "s" : ""}`;
+    } else {
+      timeAgoText = `${diffDays} jour${diffDays > 1 ? "s" : ""}`;
+    }
+
+    return `Il y a de cela ${timeAgoText}`;
   };
 
   const getStatus = (status: string | undefined) => {
@@ -73,7 +119,7 @@ export function NotificationDetail({
             En attente
           </span>
         );
-      case "accepted":
+      case "approved":
         return (
           <span className="text-green-500 dark:text-green-400 font-medium">
             Acceptée
@@ -94,6 +140,8 @@ export function NotificationDetail({
     }
   };
 
+  const isApproved = notification.status === "approved";
+
   return (
     <div className="space-y-6 max-w-full">
       <div className="flex items-center gap-4 mb-6">
@@ -106,6 +154,11 @@ export function NotificationDetail({
           <h2 className="text-xl font-bold text-foreground truncate">
             {notification.fullName}
           </h2>
+          {notification.created_at && (
+            <p className="text-sm text-muted-foreground">
+              {getTimeAgo(notification.created_at)}
+            </p>
+          )}
         </div>
       </div>
 
@@ -113,17 +166,19 @@ export function NotificationDetail({
         <h3 className="text-lg font-medium text-foreground">
           Informations du contact
         </h3>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsEditing(!isEditing)}
-          className="text-primary"
-        >
-          {isEditing ? "Annuler" : "Modifier"}
-        </Button>
+        {!isApproved && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsEditing(!isEditing)}
+            className="text-primary"
+          >
+            {isEditing ? "Annuler" : "Modifier"}
+          </Button>
+        )}
       </div>
 
-      {isEditing ? (
+      {isEditing && !isApproved ? (
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="fullName">Nom complet</Label>
@@ -294,7 +349,7 @@ export function NotificationDetail({
         </Card>
       </div>
 
-      {!isEditing && (
+      {!isEditing && !isApproved && (
         <div className="flex justify-end gap-2 mt-6 flex-wrap">
           <Button
             variant="outline"
@@ -305,9 +360,17 @@ export function NotificationDetail({
           </Button>
           <Button
             onClick={handleAccept}
+            disabled={isSubmitting}
             className="bg-green-600 dark:bg-green-600 hover:bg-green-700 dark:hover:bg-green-700 text-white"
           >
-            Accepter la demande
+            {isSubmitting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                Traitement en cours...
+              </>
+            ) : (
+              "Accepter la demande"
+            )}
           </Button>
         </div>
       )}

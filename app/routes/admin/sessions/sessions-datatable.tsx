@@ -93,6 +93,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { useSessionsStore } from "~/hooks/use-sessions-store";
 import { AddSessionForm } from "./add-session-form";
 import { EditSessionForm } from "./edit-session-form";
+import { SessionStudentsDialog } from "./session-students";
 
 const columns: ColumnDef<z.infer<typeof sessionSchema>>[] = [
   {
@@ -211,6 +212,7 @@ const columns: ColumnDef<z.infer<typeof sessionSchema>>[] = [
       const [openConfirm, setOpenConfirm] = React.useState(false);
       const [openEdit, setOpenEdit] = React.useState(false);
       const { deleteSession } = useSessionsStore();
+      const [openStudents, setOpenStudents] = React.useState(false);
 
       const handleDelete = async () => {
         try {
@@ -240,6 +242,9 @@ const columns: ColumnDef<z.infer<typeof sessionSchema>>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuItem onClick={() => setOpenStudents(true)}>
+                Voir les étudiants
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setOpenEdit(true)}>
                 Edit
               </DropdownMenuItem>
@@ -259,6 +264,12 @@ const columns: ColumnDef<z.infer<typeof sessionSchema>>[] = [
             sessionId={row.original.id}
             open={openEdit}
             onOpenChange={setOpenEdit}
+          />
+
+          <SessionStudentsDialog
+            session={row.original}
+            open={openStudents}
+            onOpenChange={setOpenStudents}
           />
 
           <ConfirmDialog

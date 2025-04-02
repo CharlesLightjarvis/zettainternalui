@@ -30,8 +30,33 @@ export const useAuth = create<AuthState>()((set) => ({
   error: null,
   isInitialized: false,
 
+  // checkAuth: async () => {
+  //   set({ isLoading: true });
+  //   try {
+  //     const response = await api.get<{ user: User }>("/api/v1/auth/me");
+  //     set({
+  //       user: response.data.user,
+  //       isLoading: false,
+  //       isInitialized: true,
+  //       error: null,
+  //     });
+  //   } catch (error) {
+  //     set({
+  //       user: null,
+  //       isLoading: false,
+  //       isInitialized: true,
+  //       error: null,
+  //     });
+  //   }
+  // },
+
   checkAuth: async () => {
-    set({ isLoading: true });
+    // Si déjà en cours de chargement, ne pas réexécuter
+    set((state) => {
+      if (state.isLoading) return state;
+      return { ...state, isLoading: true };
+    });
+
     try {
       const response = await api.get<{ user: User }>("/api/v1/auth/me");
       set({
@@ -41,6 +66,7 @@ export const useAuth = create<AuthState>()((set) => ({
         error: null,
       });
     } catch (error) {
+      // Ne pas définir d'erreur pour les 401, c'est un état normal quand non authentifié
       set({
         user: null,
         isLoading: false,

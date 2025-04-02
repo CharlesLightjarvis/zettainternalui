@@ -21,7 +21,7 @@ export interface FormationInterest {
   email: string;
   phone: string;
   message: string;
-  status: "pending" | "accepted" | "rejected";
+  status: "pending" | "approved" | "rejected";
   created_at: string;
   updated_at: string;
   formation: Formation;
@@ -34,7 +34,7 @@ export interface FormationInterestPayload {
     email: string;
     phone: string;
     message: string;
-    status: "pending" | "accepted" | "rejected";
+    status: "pending" | "approved" | "rejected";
     created_at: string;
     updated_at: string;
     formation: {
